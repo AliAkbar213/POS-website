@@ -3,6 +3,7 @@ const { randomBytes } = require("node:crypto");
 const express = require("express")
 const cors = require("cors");
 const session = require("express-session");
+const PgSession = require("./sessionStore");
 const pool = require("./dbConnection");
 const adminSalesRoute = require("./routes/adminSalesRoute");
 const adminCashiersRoute = require("./routes/adminCashiersRoute");
@@ -16,24 +17,36 @@ const app = express();
 
 app.set('trust proxy', 1)
 
+const deployed = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+if (deployed && !process.env.SESSION_SECRET) {
+    throw new Error("Set SESSION_SECRET to a stable random secret before deploying.");
+}
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://pos100.netlify.app"
+];
+// Reject untrusted browser origins before any session-changing route runs.
+app.use((req, res, next) => {
+    if (req.headers.origin && !allowedOrigins.includes(req.headers.origin)) {
+        return res.status(403).json({ message: "This frontend origin is not allowed." });
+    }
+    next();
+});
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://pos-website-mocha.vercel.app/"
-    ],
+    origin: allowedOrigins,
     credentials: true
 }));
 
 app.use(express.json())
 const sessionOptions = {
-
+    store: new PgSession(pool),
     secret: process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
     resave: false,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+        sameSite: deployed ? "none" : "lax",
+        secure: deployed,
         maxAge: 8 * 60 * 60 * 1000
     }
 };
@@ -71,6 +84,10 @@ app.get("/api/test", (_req, res) => {
     res.json({ status: "ok", message: "POS API is running" });
 });
 
-app.listen(process.env.PORT || 5000, () => {
-    console.log(`listening on port: ${process.env.PORT || 5000}`);
-})
+if (require.main === module) {
+    app.listen(process.env.PORT || 5000, () => {
+        console.log(`listening on port: ${process.env.PORT || 5000}`);
+    });
+}
+
+module.exports = app;
