@@ -3,7 +3,6 @@ const { randomBytes } = require("node:crypto");
 const express = require("express")
 const cors = require("cors");
 const session = require("express-session");
-const PgSession = require("./sessionStore");
 const pool = require("./dbConnection");
 const adminSalesRoute = require("./routes/adminSalesRoute");
 const adminCashiersRoute = require("./routes/adminCashiersRoute");
@@ -39,7 +38,6 @@ app.use(cors({
 
 app.use(express.json())
 const sessionOptions = {
-    store: new PgSession(pool),
     secret: process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
     resave: false,
     saveUninitialized: false,
