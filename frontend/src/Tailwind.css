@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-strong: #1e3a8a;
+  --color-primary-soft: #dbeafe;
+  --color-background: #eff6ff;
+  --color-surface: #fff;
+  --color-border: #bfdbfe;
+  --color-text-main: #172554;
+  --color-text-muted: #475569;
+  --color-on-primary: #fff;
+  --font-body: Inter, system-ui, sans-serif;
+  --font-display: Manrope, system-ui, sans-serif;
+}
+
+@layer components {
+  .theme-cashier {
+    --color-primary: #0075f2;
+    --color-primary-hover: #005fc7;
+  }
+
+  .theme-cashier :is(.btn-primary, .btn-secondary) {
+    @apply rounded-xl;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-border bg-surface p-5 shadow-sm;
+  }
+
+  .field {
+    @apply block w-full rounded-lg border border-border bg-surface px-3 py-2;
+    @apply focus-visible:outline-2 focus-visible:outline-primary;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-semibold;
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-on-primary hover:bg-primary-hover;
+  }
+
+  .btn-secondary {
+    @apply border border-border bg-surface text-primary-hover hover:bg-background;
+  }
+
+  .btn-secondary[aria-pressed="true"] {
+    @apply border-primary bg-primary text-on-primary;
+  }
+}
