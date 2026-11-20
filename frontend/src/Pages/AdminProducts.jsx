@@ -1,3 +1,4 @@
+import { apiFetch } from "../auth"
 import { useState } from "react"
 import { WorkspacePage } from "../WorkspaceLayout"
 import apiUrl from "../apiUrl"
@@ -9,7 +10,7 @@ const priceFormat = new Intl.NumberFormat("en-KW", {
 })
 
 function AdminProducts() {
-  const { data: products, loading, error } = useFetch(`${apiUrl}/api/products`)
+  const { data: products, loading, error } = useFetch("admin", `${apiUrl}/api/products`)
 
   const [savedProducts, setSavedProducts] = useState({})
   const [draft, setDraft] = useState(null)
@@ -39,9 +40,8 @@ function AdminProducts() {
     setSaveError("")
     try {
       const { id, name, price, barcode } = draft
-      const response = await fetch(`${apiUrl}/api/products/${id}`, {
+      const response = await apiFetch("admin", `${apiUrl}/api/products/${id}`, {
         method: "PATCH",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, price: price.trim(), barcode }),
       })

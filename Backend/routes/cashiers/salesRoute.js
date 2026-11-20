@@ -12,8 +12,8 @@ const sorts = new Map([
 
 router.use((req, res, next) => {
     res.set("Cache-Control", "no-store");
-    if (!req.session.cashier) return res.status(401).json({ message: "Sign in as a cashier." });
-    if (req.session.cashier.store_id == null) {
+    if (!req.cashier) return res.status(401).json({ message: "Sign in as a cashier." });
+    if (req.cashier.store_id == null) {
         return res.status(403).json({ message: "This cashier has no assigned store." });
     }
     next();
@@ -25,7 +25,7 @@ router.get("/catalog", async (req, res) => {
          FROM public.products p LEFT JOIN public.inventory i ON i.product_id = p.id AND i.store_id = $1
          WHERE p.price >= 0
          ORDER BY (COALESCE(i.stock, 0) > 0) DESC, p.name, p.id`,
-        [req.session.cashier.store_id]
+        [req.cashier.store_id]
     );
     res.json(rows);
 });
@@ -54,7 +54,7 @@ router.get("/", async (req, res) => {
            AND ($3::date IS NULL OR s.created_at < (($3::date + 1)::timestamp AT TIME ZONE 'Asia/Kuwait'))
            AND ($4 = '' OR lower(s.payment_method) = lower($4))
          ORDER BY ${order} LIMIT 26 OFFSET $5`,
-        [req.session.cashier.store_id, from || null, to || null, payment, (Number(page) - 1) * 25]
+        [req.cashier.store_id, from || null, to || null, payment, (Number(page) - 1) * 25]
     );
     res.json({ sales: rows.slice(0, 25), hasMore: rows.length > 25 });
 });
@@ -71,7 +71,7 @@ router.post("/", async (req, res) => {
         return res.status(400).json({ message: "Choose products, whole quantities and a payment method." });
     }
 
-    const { id: cashierId, store_id: storeId } = req.session.cashier;
+    const { id: cashierId, store_id: storeId } = req.cashier;
     const client = await pool.connect();
     try {
         await client.query("BEGIN");

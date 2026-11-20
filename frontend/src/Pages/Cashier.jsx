@@ -8,7 +8,7 @@ import { WorkspaceLayout, WorkspacePage } from "../WorkspaceLayout"
 const cashiersUrl = `${apiUrl}/api/cashiers`
 
 function CashierLogin({ onSignIn }) {
-  const { data: cashiers, loading, error: listError } = useFetch(cashiersUrl)
+  const { data: cashiers, loading, error: listError } = useFetch("cashier", cashiersUrl)
   const [cashierId, setCashierId] = useState("")
   const [pin, setPin] = useState("")
   const [error, setError] = useState("")
@@ -19,7 +19,7 @@ function CashierLogin({ onSignIn }) {
     setError("")
     setSubmitting(true)
     try {
-      onSignIn(await updateSession(cashiersUrl, "login", { cashierId, pin }))
+      onSignIn(await updateSession("cashier", cashiersUrl, "login", { cashierId, pin }))
     } catch (error) {
       setError(error.message)
       setPin("")
@@ -54,7 +54,7 @@ function CashierLogin({ onSignIn }) {
 }
 
 function Cashier() {
-  const { data: initialSession, loading, error: sessionError } = useFetch(`${cashiersUrl}/session`)
+  const { data: initialSession, loading, error: sessionError } = useFetch("cashier", `${cashiersUrl}/session`)
   const [session, setSession] = useState(null)
   const [error, setError] = useState("")
   const [signingOut, setSigningOut] = useState(false)
@@ -64,7 +64,7 @@ function Cashier() {
     setError("")
     setSigningOut(true)
     try {
-      setSession(await updateSession(cashiersUrl, "logout", {}))
+      setSession(await updateSession("cashier", cashiersUrl, "logout", {}))
     } catch (error) {
       setError(error.message)
     } finally {

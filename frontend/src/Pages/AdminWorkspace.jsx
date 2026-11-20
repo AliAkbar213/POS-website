@@ -8,7 +8,7 @@ import updateSession from "../updateSession"
 const adminUrl = `${apiUrl}/api/admin`
 
 export default function AdminWorkspace() {
-  const { data: initialSession, loading, error: sessionError } = useFetch(`${adminUrl}/session`)
+  const { data: initialSession, loading, error: sessionError } = useFetch("admin", `${adminUrl}/session`)
   const [session, setSession] = useState(null)
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -19,7 +19,7 @@ export default function AdminWorkspace() {
     setError("")
     setSubmitting(true)
     try {
-      setSession(await updateSession(adminUrl, action, body))
+      setSession(await updateSession("admin", adminUrl, action, body))
     } catch (error) {
       setError(error.message)
     } finally {

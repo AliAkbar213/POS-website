@@ -1,3 +1,4 @@
+import { apiFetch } from "../auth"
 import { useEffect, useState } from "react"
 import { WorkspacePage } from "../WorkspaceLayout"
 import apiUrl from "../apiUrl"
@@ -6,9 +7,8 @@ const cashiersUrl = `${apiUrl}/api/admin/cashiers`
 const emptyDraft = { name: "", storeId: "", pin: "" }
 
 async function request(path = "", options = {}) {
-  const response = await fetch(`${cashiersUrl}${path}`, {
+  const response = await apiFetch("admin", `${cashiersUrl}${path}`, {
     ...options,
-    credentials: "include",
     headers: { "Content-Type": "application/json" },
   })
   const data = await response.json().catch(() => null)

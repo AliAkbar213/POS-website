@@ -11,7 +11,7 @@ const dates = new Intl.DateTimeFormat("en-KW", { dateStyle: "medium", timeStyle:
 const defaults = { from: "", to: "", store: "", cashier: "", payment: "", min: "", max: "", sort: "newest" }
 
 function SaleDetails({ id, onClose }) {
-  const { data, loading, error } = useFetch(`${salesUrl}/${id}`)
+  const { data, loading, error } = useFetch("admin", `${salesUrl}/${id}`)
   return (
     <section className="panel mt-5" aria-label={`Sale #${id} details`}>
       <div className="flex items-center justify-between gap-3">
@@ -56,8 +56,8 @@ export default function AdminSales() {
   const [filters, setFilters] = useState(() => Object.fromEntries(Object.entries(defaults).map(([key, value]) => [key, params.get(key) ?? value])))
   const [revision, setRevision] = useState(0)
   const [selected, setSelected] = useState(null)
-  const { data: options, error: optionsError } = useFetch(`${salesUrl}/options`)
-  const { data, loading, error } = useFetch(`${salesUrl}?${params}&v=${revision}`)
+  const { data: options, error: optionsError } = useFetch("admin", `${salesUrl}/options`)
+  const { data, loading, error } = useFetch("admin", `${salesUrl}?${params}&v=${revision}`)
   const page = Number(params.get("page") || 1)
   const invalidRange = filters.from && filters.to && filters.from > filters.to
   const invalidAmounts = filters.min !== "" && filters.max !== "" && Number(filters.min) > Number(filters.max)

@@ -1,3 +1,4 @@
+import { apiFetch } from "../auth"
 import { useState } from "react"
 import apiUrl from "../apiUrl"
 import useFetch from "../CustomHooks/useFetch"
@@ -8,7 +9,7 @@ const dateTime = new Intl.DateTimeFormat("en-KW", { dateStyle: "medium", timeSty
 
 function Checkout() {
   const [revision, setRevision] = useState(0)
-  const { data: products, loading, error: catalogError } = useFetch(`${salesUrl}/catalog?v=${revision}`)
+  const { data: products, loading, error: catalogError } = useFetch("cashier", `${salesUrl}/catalog?v=${revision}`)
   const [search, setSearch] = useState("")
   const [cart, setCart] = useState({})
   const [paymentMethod, setPaymentMethod] = useState("Cash")
@@ -28,9 +29,8 @@ function Checkout() {
     setReceipt(null)
     setSubmitting(true)
     try {
-      const response = await fetch(salesUrl, {
+      const response = await apiFetch("cashier", salesUrl, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paymentMethod,
@@ -125,7 +125,7 @@ function SalesHistory() {
   const [page, setPage] = useState(1)
   const invalidRange = Boolean(filters.from && filters.to && filters.from > filters.to)
   const query = new URLSearchParams({ ...filters, page })
-  const { data, loading, error } = useFetch(`${salesUrl}?${query}`)
+  const { data, loading, error } = useFetch("cashier", `${salesUrl}?${query}`)
 
   function update(event) {
     setFilters({ ...filters, [event.target.name]: event.target.value })

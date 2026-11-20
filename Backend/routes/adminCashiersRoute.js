@@ -7,7 +7,7 @@ const validId = (value) => typeof value === "string" && /^[1-9][0-9]{0,18}$/.tes
 
 router.use((req, res, next) => {
     res.set("Cache-Control", "no-store");
-    if (!req.session.adminId) return res.status(401).json({ message: "Sign in as admin to manage cashiers." });
+    if (req.auth?.role !== "admin") return res.status(401).json({ message: "Sign in as admin to manage cashiers." });
     if (req.method !== "GET" && !req.is("application/json")) {
         return res.status(415).json({ message: "Expected a JSON request." });
     }

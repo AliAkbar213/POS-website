@@ -18,7 +18,7 @@ function validDate(value) {
 
 router.use((req, res, next) => {
     res.set("Cache-Control", "no-store");
-    if (!req.session.adminId) return res.status(401).json({ message: "Sign in as admin to view sales." });
+    if (req.auth?.role !== "admin") return res.status(401).json({ message: "Sign in as admin to view sales." });
     next();
 });
 

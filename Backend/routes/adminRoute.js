@@ -1,3 +1,4 @@
+const { issueToken } = require("../auth");
 const express = require("express");
 const pool = require("../dbConnection");
 
@@ -12,17 +13,17 @@ router.use((_req, res, next) => {
 });
 
 router.get("/session", (req, res) => {
-    res.json({ signedIn: Boolean(req.session.adminId) });
+    res.json({ signedIn: req.auth?.role === "admin" });
 });
 
-router.post(["/login", "/logout"], (req, res, next) => {
+router.post("/login", (req, res, next) => {
     if (!req.is("application/json")) {
         return res.status(415).json({ message: "Expected a JSON request." });
     }
     next();
 });
 
-router.post("/login", async (req, res, next) => {
+router.post("/login", async (req, res) => {
     const { password } = req.body ?? {};
     if (typeof password !== "string" || !password || password.includes("\0")) {
         return res.status(400).json({ message: "Enter the admin password." });
@@ -51,23 +52,10 @@ router.post("/login", async (req, res, next) => {
     }
 
     attemptsByAddress.delete(address);
-    req.session.regenerate((error) => {
-        if (error) return next(error);
-        req.session.adminId = admin.id;
-        req.session.save((saveError) => {
-            if (saveError) return next(saveError);
-            res.json({ signedIn: true });
-        });
-    });
+    const token = await issueToken("admin", admin.id);
+    res.json({ signedIn: true, token });
 });
 
-router.post("/logout", (req, res, next) => {
-    req.session.destroy((error) => {
-        if (error) return next(error);
-        res.clearCookie("pos.admin.sid");
-        res.json({ signedIn: false });
-    });
-});
 
 router.use((error, _req, res, _next) => {
     console.error("Admin session request failed", error.code || error.name);

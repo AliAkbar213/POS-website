@@ -1,6 +1,7 @@
+import { apiFetch } from "../auth"
 import { useEffect, useState } from "react"
 
-function useFetch(url) {
+function useFetch(role, url) {
   const [result, setResult] = useState(null)
 
   useEffect(() => {
@@ -8,7 +9,7 @@ function useFetch(url) {
 
     async function fetchData() {
       try {
-        const response = await fetch(url, { credentials: "include", signal: controller.signal })
+        const response = await apiFetch(role, url, { signal: controller.signal })
         if (!response.ok) {
           throw new Error(`Request failed (HTTP ${response.status}).`)
         }
@@ -25,7 +26,7 @@ function useFetch(url) {
 
     fetchData()
     return () => controller.abort()
-  }, [url])
+  }, [role, url])
 
   if (result?.url !== url) {
     return { data: [], loading: true, error: null }

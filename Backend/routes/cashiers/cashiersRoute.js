@@ -1,3 +1,4 @@
+const { issueToken } = require("../../auth");
 const express = require("express");
 const pool = require("../../dbConnection");
 
@@ -20,18 +21,18 @@ router.get("/", async (_req, res) => {
 });
 
 router.get("/session", (req, res) => {
-    res.json({ cashier: req.session.cashier ?? null });
+    res.json({ cashier: req.cashier ?? null });
 });
 
 // Requiring JSON makes cross-origin form submissions ineligible for session changes.
-router.post(["/login", "/logout"], (req, res, next) => {
+router.post("/login", (req, res, next) => {
     if (!req.is("application/json")) {
         return res.status(415).json({ message: "Expected a JSON request." });
     }
     next();
 });
 
-router.post("/login", async (req, res, next) => {
+router.post("/login", async (req, res) => {
     const { cashierId, pin } = req.body ?? {};
     if (
         typeof cashierId !== "string" ||
@@ -70,23 +71,10 @@ router.post("/login", async (req, res, next) => {
     }
 
     attemptsByCashier.delete(cashierId);
-    req.session.regenerate((error) => {
-        if (error) return next(error);
-        req.session.cashier = cashier;
-        req.session.save((saveError) => {
-            if (saveError) return next(saveError);
-            res.json({ cashier });
-        });
-    });
+    const token = await issueToken("cashier", cashier.id);
+    res.json({ cashier, token });
 });
 
-router.post("/logout", (req, res, next) => {
-    req.session.destroy((error) => {
-        if (error) return next(error);
-        res.clearCookie("pos.sid");
-        res.json({ cashier: null });
-    });
-});
 
 router.use((error, _req, res, _next) => {
     console.error("Cashier request failed", error.code || error.name);
